@@ -4,6 +4,8 @@
 
 using namespace std;
 
+const double pi = acos(-1);
+
 struct Lexema {
     char type;
     double value;
@@ -13,10 +15,15 @@ int getPrioritet(char cur_char){
     if (cur_char == '+' || cur_char == '-') {
         return 1;
     }
-    if (cur_char == '*' || cur_char == '/') {
+    if (cur_char == '*' || cur_char == '/' || cur_char == '%') {
         return 2;
     }
-//    if (cur_char == '')
+    if (cur_char == '^'){
+        return 3;
+    }
+    if (cur_char == '1'){
+        return 4;
+    }
     return 0;
 }
 
@@ -70,7 +77,7 @@ bool maths(stack <Lexema> & stack_number, stack <Lexema> & stack_operation){
             buz = stack_number.top().value;
             stack_number.pop();
             if (foo == 0) {
-                cerr << "Error: divided by zero!";
+                cerr << "Error: Divided by zero!";
                 return false;
             }
             bar = buz - (floor(buz / foo) * foo);
@@ -79,8 +86,17 @@ bool maths(stack <Lexema> & stack_number, stack <Lexema> & stack_operation){
             stack_number.push(lexema);
             break;
 
+        case '^' :
+            buz = stack_number.top().value;
+            stack_number.pop();
+            bar = pow(buz, foo);
+            lexema.value = bar;
+            lexema.type = '0';
+            stack_number.push(lexema);
+            break;
+
         default :
-            cerr << "Unknown operation!";
+            cerr << "Error: Unknown operation!";
             return false;
     }
     stack_operation.pop();
@@ -103,7 +119,7 @@ int main(){
             stack_number.push(lexema);
             continue;
         }
-        if (cur_char == '+' || cur_char == '-' || cur_char == '*' || cur_char == '/' || cur_char == '%') {
+        if (cur_char == '+' || cur_char == '-' || cur_char == '*' || cur_char == '/' || cur_char == '%' || cur_char == '^') {
             if (stack_operation.empty() || getPrioritet(cur_char) > getPrioritet(stack_operation.top().type)) {
                 lexema.type = cur_char;
                 lexema.value = 0;
@@ -117,6 +133,64 @@ int main(){
                     continue;
                 }
             }
+        }
+        //sin
+        if (cur_char == 's'){
+            cin.ignore();
+            cur_char = cin.peek();
+            if (cur_char == 'i') {
+                cin.ignore();
+                cur_char = cin.peek();
+                if (cur_char == 'n') {
+                    lexema.type = '1';
+                    stack_operation.push(lexema);
+                    cin.ignore();
+                    continue;
+                }
+            }
+            cerr << "Error: Incorrect input!";
+            return -1;
+        }
+        //pi
+        if (cur_char == 'p'){
+            cin.ignore();
+            cur_char = cin.peek();
+            if (cur_char == 'i') {
+                lexema.type = '0';
+                lexema.value = pi;
+                stack_number.push(lexema);
+                cin.ignore();
+                continue;
+            } else {
+                cerr << "Error: Incorrect input!";
+                return -1;
+            }
+        }
+        if (cur_char == '(') {
+            lexema.type = cur_char;
+            lexema.value = 0;
+            stack_operation.push(lexema);
+            cin.ignore();
+            first_minus_flag = true;
+            continue;
+        }
+        if (cur_char == ')') {
+            while (stack_operation.top().type != '(') {
+                if (!maths(stack_number, stack_operation)) {
+                    return -1;
+                }
+            }
+            stack_operation.pop();
+            cin.ignore();
+            continue;
+        }
+        if (cur_char == ' ') {
+            cin.ignore();
+            continue;
+        }
+        else {
+            cerr << "Error: Incorrect input!";
+            return -1;
         }
     }
     while (!stack_operation.empty()) {
