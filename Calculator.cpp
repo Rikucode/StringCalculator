@@ -8,6 +8,17 @@ struct Lexema {
     double value;
 };
 
+int getPrioritet(char cur_char){
+    if (cur_char == '+' || cur_char == '-') {
+        return 1;
+    }
+    if (cur_char == '*' || cur_char == '/') {
+        return 2;
+    }
+//    if (cur_char == '')
+    return 0;
+}
+
 bool maths(stack <Lexema> & stack_number, stack <Lexema> & stack_operation){
     double foo, buz, bar;
     Lexema lexema;
@@ -58,6 +69,7 @@ bool maths(stack <Lexema> & stack_number, stack <Lexema> & stack_operation){
             cerr << "Unknown operation!";
             return false;
     }
+    stack_operation.pop();
     return true;
 }
 
@@ -76,15 +88,26 @@ int main(){
             continue;
         }
         if (cur_char == '+' || cur_char == '-' || cur_char == '*' || cur_char == '/') {
-            lexema.type = cur_char;
-            lexema.value = 0;
-            stack_operation.push(lexema);
-            cin.ignore();
-            continue;
+            if (stack_operation.empty() || getPrioritet(cur_char) > getPrioritet(stack_operation.top().type)) {
+                lexema.type = cur_char;
+                lexema.value = 0;
+                stack_operation.push(lexema);
+                cin.ignore();
+                continue;
+            }
+            else {
+                if (maths(stack_number, stack_operation)) {
+                    stack_number.top().value;
+                    continue;
+                }
+            }
         }
     }
-    if (maths(stack_number, stack_operation)) {
-        cout << "Answer is " << stack_number.top().value;
+    while (!stack_operation.empty()) {
+        if (!maths(stack_number, stack_operation)) {
+            return -1;
+        }
     }
+    cout << "Answer is " << stack_number.top().value;
     return 0;
 }
