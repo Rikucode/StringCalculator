@@ -1,6 +1,6 @@
 # StringCalculator
 
-#Defined Operations:
+# Defined Operations:
 
 ```
 +, -, *, /, %, ! 
