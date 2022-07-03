@@ -3,6 +3,6 @@
 # Defined Operations:
 
 ```
-+, -, *, /, %, ! 
-sin, cos, tg, ctg, exp
++, -, *, /, ^, %, ! 
+sin, cos, tg, ctg, exp, sqrt
 ```
