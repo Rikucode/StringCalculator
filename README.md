@@ -4,5 +4,4 @@
 
 ```
 +, -, *, /, ^, %, ! 
-sin, cos, tg, ctg, exp, sqrt
 ```
