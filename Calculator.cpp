@@ -2,6 +2,8 @@
 #include <stack>
 #include <cmath>
 #include <iomanip>
+#include <string>
+#include <sstream>
 
 using namespace std;
 
@@ -19,10 +21,10 @@ int getPrioritet(char cur_char){
     if (cur_char == '*' || cur_char == '/' || cur_char == '%') {
         return 2;
     }
-    if (cur_char == '^' || cur_char == 'q') {
+    if (cur_char == '^') {
         return 3;
     }
-    if (cur_char == 's' || cur_char == 'c' || cur_char == 't' || cur_char == 'g' || cur_char == 'e' || cur_char == '!') {
+    if (cur_char == '!') {
         return 4;
     }
     return 0;
@@ -107,60 +109,6 @@ bool maths(stack <Lexema> & stack_number, stack <Lexema> & stack_operation) {
             stack_number.push(lexema);
             break;
 
-        case 's' :
-            bar = sin(foo);
-            lexema.value = bar;
-            lexema.type = '0';
-            stack_number.push(lexema);
-            break;
-
-        case 'c' :
-            bar = cos(foo);
-            lexema.value = bar;
-            lexema.type = '0';
-            stack_number.push(lexema);
-            break;
-
-        case 't' :
-            if (cos(foo) == 0){
-                cerr << "Error: tan is undefined!";
-                return false;
-            }
-            bar = tan(foo);
-            lexema.value = bar;
-            lexema.type = '0';
-            stack_number.push(lexema);
-            break;
-
-        case 'g' :
-            if (sin(foo) == 0){
-                cerr << "Error: cotan is undefined!";
-                return false;
-            }
-            bar = 1/(tan(foo));
-            lexema.value = bar;
-            lexema.type = '0';
-            stack_number.push(lexema);
-            break;
-
-        case 'q' :
-            if (foo < 0){
-                cerr << "Error: Negative number under square root!";
-                return false;
-            }
-            bar = sqrt(foo);
-            lexema.value = bar;
-            lexema.type = '0';
-            stack_number.push(lexema);
-            break;
-
-        case 'e' :
-            bar = exp(foo);
-            lexema.value = bar;
-            lexema.type = '0';
-            stack_number.push(lexema);
-            break;
-
         default :
             cerr << "Error: Unknown operation or incorrect input!";
             return false;
@@ -169,19 +117,24 @@ bool maths(stack <Lexema> & stack_number, stack <Lexema> & stack_operation) {
     return true;
 }
 
-int main(){
+int calculate(string str){
+    stringstream sstr(str);
     char cur_char;
     bool first_minus_flag = true;
     stack <Lexema> stack_number;
     stack <Lexema> stack_operation;
     Lexema lexema;
     while(true) {
-        cur_char = cin.peek();
-        if (cur_char == '\n') break;
+        cur_char = sstr.peek();
+        if (cur_char == '\377') break;
+        if (cur_char == ' ') {
+            sstr.ignore();
+            continue;
+        }
         if (cur_char >= '0' && cur_char <= '9' || first_minus_flag && cur_char == '-') {
             first_minus_flag = false;
             lexema.type = '0';
-            cin >> lexema.value;
+            sstr >> lexema.value;
             stack_number.push(lexema);
             continue;
         }
@@ -190,7 +143,7 @@ int main(){
                 lexema.type = cur_char;
                 lexema.value = 0;
                 stack_operation.push(lexema);
-                cin.ignore();
+                sstr.ignore();
                 continue;
             }
             else {
@@ -200,124 +153,11 @@ int main(){
                 }
             }
         }
-        //sin
-        if (cur_char == 's'){
-            cin.ignore();
-            cur_char = cin.peek();
-            if (cur_char == 'i') {
-                cin.ignore();
-                cur_char = cin.peek();
-                if (cur_char == 'n') {
-                    lexema.type = 's';
-                    stack_operation.push(lexema);
-                    cin.ignore();
-                    continue;
-                }
-            }
-            if (cur_char == 'q') {
-                cin.ignore();
-                cur_char = cin.peek();
-                if (cur_char == 'r') {
-                    cin.ignore();
-                    cur_char = cin.peek();
-                    if (cur_char == 't') {
-                        lexema.type = 'q';
-                        stack_operation.push(lexema);
-                        cin.ignore();
-                        continue;
-                    }
-                }
-            }
-            cerr << "Error: Incorrect input!";
-            return -1;
-        }
-        //cos - ctg
-        if (cur_char == 'c'){
-            cin.ignore();
-            cur_char = cin.peek();
-            if (cur_char == 'o') {
-                cin.ignore();
-                cur_char = cin.peek();
-                if (cur_char == 's') {
-                    lexema.type = 'c';
-                    stack_operation.push(lexema);
-                    cin.ignore();
-                    continue;
-                }
-            }
-            if (cur_char == 't') {
-                cin.ignore();
-                cur_char = cin.peek();
-                if (cur_char == 'g') {
-                    lexema.type = 'g';
-                    stack_operation.push(lexema);
-                    cin.ignore();
-                    continue;
-                }
-            }
-            cerr << "Error: Incorrect input!";
-            return -1;
-        }
-        //tg-tan
-        if (cur_char == 't'){
-            cin.ignore();
-            cur_char = cin.peek();
-            if (cur_char == 'a') {
-                cin.ignore();
-                cur_char = cin.peek();
-                if (cur_char == 'n') {
-                    lexema.type = 't';
-                    stack_operation.push(lexema);
-                    cin.ignore();
-                    continue;
-                }
-            }
-            if (cur_char == 'g') {
-                lexema.type = 't';
-                stack_operation.push(lexema);
-                cin.ignore();
-                continue;
-            }
-            cerr << "Error: Incorrect input!";
-            return -1;
-        }
-        //exp
-        if (cur_char == 'e') {
-            cin.ignore();
-            cur_char = cin.peek();
-            if (cur_char == 'x') {
-                cin.ignore();
-                cur_char = cin.peek();
-                if (cur_char == 'p') {
-                    lexema.type = 'e';
-                    stack_operation.push(lexema);
-                    cin.ignore();
-                    continue;
-                }
-            }
-            cerr << "Error: Incorrect input!";
-            return -1;
-        }
-        //pi
-        if (cur_char == 'p'){
-            cin.ignore();
-            cur_char = cin.peek();
-            if (cur_char == 'i') {
-                lexema.type = '0';
-                lexema.value = pi;
-                stack_number.push(lexema);
-                cin.ignore();
-                continue;
-            } else {
-                cerr << "Error: Incorrect input!";
-                return -1;
-            }
-        }
         if (cur_char == '(') {
             lexema.type = cur_char;
             lexema.value = 0;
             stack_operation.push(lexema);
-            cin.ignore();
+            sstr.ignore();
             first_minus_flag = true;
             continue;
         }
@@ -328,11 +168,7 @@ int main(){
                 }
             }
             stack_operation.pop();
-            cin.ignore();
-            continue;
-        }
-        if (cur_char == ' ') {
-            cin.ignore();
+            sstr.ignore();
             continue;
         }
         else {
@@ -345,6 +181,17 @@ int main(){
             return -1;
         }
     }
-    cout << setprecision(10) << "Answer is " << stack_number.top().value;
+    cout << setprecision(10) << "Answer is " << stack_number.top().value << endl;
+    return 0;
+}
+
+int main() {
+    cout << "String calculator." << endl << "If you wanna quit leave the line empty";
+    string str;
+    while (true) {
+    getline(cin, str);
+    if (str == "") return 0;
+    calculate(str);
+    }
     return 0;
 }
