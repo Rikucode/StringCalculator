@@ -135,6 +135,8 @@ int calculate(string str){
     stringstream sstr(str);
     char cur_char;
     bool first_symbol = true;
+    bool previous_sign = false;
+    bool num_after_sk_flag = false;
     stack <Lexema> stack_number;
     stack <Lexema> stack_operation;
     Lexema lexema;
@@ -146,15 +148,28 @@ int calculate(string str){
             continue;
         }
         if (cur_char >= '0' && cur_char <= '9') {
+            if (num_after_sk_flag){
+                cerr << "Error: incorrect input" << endl;
+                return -1;
+            }
             lexema.type = '0';
             sstr >> lexema.value;
+            previous_sign = false;
             stack_number.push(lexema);
             first_symbol = false;
             continue;
         }
         if ((cur_char == '+' || cur_char == '-' || cur_char == '*' || cur_char == '/' || cur_char == '%' || cur_char == '^' || cur_char == '!') && !first_symbol) {
+            if (previous_sign) {
+                cerr << "Error: Incorrect Input" << endl;
+                previous_sign = false;
+                return  -1;
+            }
             if (stack_operation.empty() || getPrioritet(cur_char) > getPrioritet(stack_operation.top().type)) {
+                num_after_sk_flag = false;
                 lexema.type = cur_char;
+                previous_sign = true;
+                first_symbol = false;
                 lexema.value = 0;
                 stack_operation.push(lexema);
                 sstr.ignore();
@@ -168,7 +183,9 @@ int calculate(string str){
             }
         }
         if (cur_char == '(') {
+            previous_sign = false;
             first_symbol = false;
+            num_after_sk_flag = false;
             lexema.type = cur_char;
             lexema.value = 0;
             stack_operation.push(lexema);
@@ -177,6 +194,8 @@ int calculate(string str){
         }
         if (cur_char == ')') {
             first_symbol = false;
+            previous_sign = false;
+            num_after_sk_flag = true;
             while (stack_operation.top().type != '(') {
                 if (!maths(stack_number, stack_operation)) {
                     return -1;
@@ -193,6 +212,7 @@ int calculate(string str){
     }
     while (!stack_operation.empty()) {
         if (!maths(stack_number, stack_operation)) {
+            cerr << "Error: incorrect input!" << endl;
             return -1;
         }
     }
@@ -215,9 +235,9 @@ int main() {
         }
         str = StringReplacer(str, "(-", "(0-");
         str = StringReplacer(str, "()", "0");
-        str = StringReplacer(str, "--", "");
-        str = StringReplacer(str, "-+", "-");
-        str = StringReplacer(str, "+-", "-");
+//        str = StringReplacer(str, "--", "");
+//        str = StringReplacer(str, "-+", "-");
+//        str = StringReplacer(str, "+-", "-");
         if (str[0] == '-') {
             str = '0' + str;
         }
