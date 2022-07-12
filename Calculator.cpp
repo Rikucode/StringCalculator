@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <string>
 #include <sstream>
+#include <algorithm>
 
 using namespace std;
 
@@ -202,10 +203,21 @@ int calculate(string str){
 int main() {
     cout << "String calculator." << endl << "If you wanna quit leave the line empty" << endl;
     string str;
+    int count_l, count_r;
     int exitcode;
     while (true) {
         getline(cin, str);
+        count_l = count(str.begin(),str.end(),'(');
+        count_r = count(str.begin(),str.end(),')');
+        if(count_r != count_l){
+            cerr<<"Error: Incorrect Input!"<<endl;
+            continue;
+        }
         str = StringReplacer(str, "(-", "(0-");
+        str = StringReplacer(str, "()", "0");
+        str = StringReplacer(str, "--", "");
+        str = StringReplacer(str, "-+", "-");
+        str = StringReplacer(str, "+-", "-");
         if (str[0] == '-') {
             str = '0' + str;
         }
