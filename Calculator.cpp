@@ -14,6 +14,19 @@ struct Lexema {
     double value;
 };
 
+string StringReplacer(const string& inputStr, const string& src, const string& dst)
+{
+    string result(inputStr);
+
+    size_t pos = result.find(src);
+    while(pos != string::npos) {
+        result.replace(pos, src.size(), dst);
+        pos = result.find(src, pos);
+    }
+
+    return result;
+}
+
 int getPrioritet(char cur_char){
     if (cur_char == '+' || cur_char == '-') {
         return 1;
@@ -120,7 +133,7 @@ bool maths(stack <Lexema> & stack_number, stack <Lexema> & stack_operation) {
 int calculate(string str){
     stringstream sstr(str);
     char cur_char;
-    bool first_minus_flag = true;
+    bool first_symbol = true;
     stack <Lexema> stack_number;
     stack <Lexema> stack_operation;
     Lexema lexema;
@@ -131,14 +144,14 @@ int calculate(string str){
             sstr.ignore();
             continue;
         }
-        if (cur_char >= '0' && cur_char <= '9' || first_minus_flag && cur_char == '-') {
-            first_minus_flag = false;
+        if (cur_char >= '0' && cur_char <= '9') {
             lexema.type = '0';
             sstr >> lexema.value;
             stack_number.push(lexema);
+            first_symbol = false;
             continue;
         }
-        if (cur_char == '+' || cur_char == '-' || cur_char == '*' || cur_char == '/' || cur_char == '%' || cur_char == '^' || cur_char == '!') {
+        if ((cur_char == '+' || cur_char == '-' || cur_char == '*' || cur_char == '/' || cur_char == '%' || cur_char == '^' || cur_char == '!') && !first_symbol) {
             if (stack_operation.empty() || getPrioritet(cur_char) > getPrioritet(stack_operation.top().type)) {
                 lexema.type = cur_char;
                 lexema.value = 0;
@@ -154,14 +167,15 @@ int calculate(string str){
             }
         }
         if (cur_char == '(') {
+            first_symbol = false;
             lexema.type = cur_char;
             lexema.value = 0;
             stack_operation.push(lexema);
             sstr.ignore();
-            first_minus_flag = true;
             continue;
         }
         if (cur_char == ')') {
+            first_symbol = false;
             while (stack_operation.top().type != '(') {
                 if (!maths(stack_number, stack_operation)) {
                     return -1;
@@ -172,7 +186,7 @@ int calculate(string str){
             continue;
         }
         else {
-            cerr << "Error: Incorrect input!";
+            cerr << "Error: Incorrect input!" << endl;
             return -1;
         }
     }
@@ -186,12 +200,17 @@ int calculate(string str){
 }
 
 int main() {
-    cout << "String calculator." << endl << "If you wanna quit leave the line empty";
+    cout << "String calculator." << endl << "If you wanna quit leave the line empty" << endl;
     string str;
+    int exitcode;
     while (true) {
-    getline(cin, str);
-    if (str == "") return 0;
-    calculate(str);
+        getline(cin, str);
+        str = StringReplacer(str, "(-", "(0-");
+        if (str[0] == '-') {
+            str = '0' + str;
+        }
+        if (str == "") return 0;
+        exitcode = calculate(str);
     }
     return 0;
 }
